@@ -39,6 +39,9 @@ export class ClienteService {
         map((resp: Cliente) => {
           return resp;
     }), catchError(e => {
+      if (e.status === 400) {
+        return throwError(e);
+      }
       console.error(e.error.mensaje);
       swal.fire(e.error.mensaje, e.error.error, 'error');
       return throwError(e);
@@ -51,6 +54,9 @@ export class ClienteService {
     return this.http.put(url, cliente, {headers: this.httpHeaders}).pipe(map((resp: Cliente) => {
       return resp;
     }), catchError(e => {
+      if (e.status === 400) {
+        return throwError(e);
+      }
       console.error(e.error.mensaje);
       swal.fire(e.error.mensaje, e.error.error, 'error');
       return throwError(e);
