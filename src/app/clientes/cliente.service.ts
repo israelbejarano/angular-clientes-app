@@ -5,6 +5,9 @@ import { map, catchError } from 'rxjs/operators';
 import swal from 'sweetalert2';
 import { throwError } from 'rxjs';
 import { Router } from '@angular/router';
+import { DatePipe } from '@angular/common';
+
+
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +21,12 @@ export class ClienteService {
 
   getClientes() {
     return this.http.get(this.urlEndPoint).pipe(map((resp: Cliente[]) => {
-      return resp;
+      const clientes = resp;
+      return clientes.map(cliente => {
+        const datePipe = new DatePipe('es');
+        cliente.createAt = datePipe.transform(cliente.createAt, 'dd-MM-yyyy');
+        return cliente;
+      });
     }));
   }
 
