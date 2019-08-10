@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Cliente } from './cliente';
-import { Observable, of } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { map } from 'rxjs/operators';
-import { pipe } from '@angular/core/src/render3';
+import { map, catchError } from 'rxjs/operators';
+import swal from 'sweetalert2';
+import { throwError } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class ClienteService {
   private urlEndPoint = 'http://localhost:8080/api/clientes';
   private httpHeaders = new HttpHeaders({'Content-Type': 'application/json'});
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private router: Router) { }
 
   getClientes() {
     return this.http.get(this.urlEndPoint).pipe(map((resp: Cliente[]) => {
@@ -25,12 +26,22 @@ export class ClienteService {
     const url = this.urlEndPoint + '/' + id.toString();
     return this.http.get<Cliente>(url).pipe(map((resp: Cliente) => {
       return resp;
+    }), catchError(e => {
+      this.router.navigate(['/clientes']);
+      console.error(e.error.mensaje);
+      swal.fire('Error al editar', e.error.mensaje, 'error');
+      return throwError(e);
     }));
   }
 
   create(cliente: Cliente) {
-    return this.http.post(this.urlEndPoint, cliente, {headers: this.httpHeaders}).pipe(map((resp: Cliente) => {
-      return resp;
+    return this.http.post(this.urlEndPoint, cliente, {headers: this.httpHeaders}).pipe(
+        map((resp: Cliente) => {
+          return resp;
+    }), catchError(e => {
+      console.error(e.error.mensaje);
+      swal.fire(e.error.mensaje, e.error.error, 'error');
+      return throwError(e);
     }));
   }
 
@@ -39,6 +50,10 @@ export class ClienteService {
     const url = this.urlEndPoint + '/' + cliente.id.toString();
     return this.http.put(url, cliente, {headers: this.httpHeaders}).pipe(map((resp: Cliente) => {
       return resp;
+    }), catchError(e => {
+      console.error(e.error.mensaje);
+      swal.fire(e.error.mensaje, e.error.error, 'error');
+      return throwError(e);
     }));
   }
 
@@ -46,6 +61,10 @@ export class ClienteService {
     const url = this.urlEndPoint + '/' + id.toString();
     return this.http.delete(url, {headers: this.httpHeaders}).pipe(map((resp: any) => {
       return true;
+    }), catchError(e => {
+      console.error(e.error.mensaje);
+      swal.fire(e.error.mensaje, e.error.error, 'error');
+      return throwError(e);
     }));
   }
 
